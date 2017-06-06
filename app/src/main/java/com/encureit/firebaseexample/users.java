@@ -5,7 +5,7 @@ package com.encureit.firebaseexample;
  */
 
 public class users {
-    public String name;
+   /* public String name;
     public String value;
 
     public users(String name, String value) {
@@ -30,5 +30,5 @@ public class users {
 
     public void setValue(String value) {
         this.value = value;
-    }
+    }*/
 }

@@ -1,13 +1,15 @@
 package com.encureit.firebaseexample;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,25 +24,40 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth auth;
+    @BindView(R.id.textName)
+    TextView textName;
+    @BindView(R.id.btnLogout)
     Button btnLogout;
+    @BindView(R.id.btnUpdate)
+    Button btnUpdate;
+    @BindView(R.id.editText)
+    EditText editText;
+    @BindView(R.id.recycleView)
+    RecyclerView recycleView;
+    @BindView(R.id.activity_main)
+    LinearLayout activityMain;
+    private FirebaseAuth auth;
     ArrayList<String> list = new ArrayList<>();
-    private TextView textName;
     public RecycleAdapter mAdapter;
     public RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         auth = FirebaseAuth.getInstance();
-        btnLogout=(Button)findViewById(R.id.btnLogout);
-        textName=(TextView)findViewById(R.id.textName);
-        recyclerView=(RecyclerView)findViewById(R.id.recycleView);
+
+        recyclerView = (RecyclerView) findViewById(R.id.recycleView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mAdapter=new RecycleAdapter(list,this);
+        mAdapter = new RecycleAdapter(list, this);
         recyclerView.setAdapter(mAdapter);
 
 
@@ -50,19 +67,12 @@ public class MainActivity extends AppCompatActivity {
         ref.child("users").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-              /* list.clear();
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    users obj = snapshot.getValue(users.class);
-                    list.add(obj);
-                }
-               mAdapter.notifyDataSetChanged();*/
-
 
                 Set<String> set = new HashSet<String>();
                 Iterator i = dataSnapshot.getChildren().iterator();
 
-                while (i.hasNext()){
-                    set.add(((DataSnapshot)i.next()).getKey());
+                while (i.hasNext()) {
+                    set.add(((DataSnapshot) i.next()).getKey());
                 }
 
                 list.clear();
@@ -78,17 +88,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference mRef = database.getReference("users");
+                if (!TextUtils.isEmpty(editText.getText())){
+                    mRef.setValue(editText.getText());
+                }
 
+            }
+        });
 
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 auth.signOut();//sign out method
-                startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
             }
         });
     }
+
 
 
 }

@@ -71,7 +71,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.MyViewHo
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView textView;
-        public ImageView imageView;
+
 
         public MyViewHolder(View itemView) {
             super(itemView);
