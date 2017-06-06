@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     Button btnLogout;
     @BindView(R.id.btnUpdate)
     Button btnUpdate;
+    @BindView(R.id.btnCreate)
+    Button btnCreate;
     @BindView(R.id.editText)
     EditText editText;
     @BindView(R.id.recycleView)
@@ -46,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> list = new ArrayList<>();
     public RecycleAdapter mAdapter;
     public RecyclerView recyclerView;
+
+    private DatabaseReference mFirebaseDatabase;
+    private FirebaseDatabase mFirebaseInstance;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +67,12 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new RecycleAdapter(list, this);
         recyclerView.setAdapter(mAdapter);
 
+        mFirebaseInstance=FirebaseDatabase.getInstance();
 
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference();
+        mFirebaseDatabase = mFirebaseInstance.getReference("users");
+        final String userId = mFirebaseDatabase.push().getKey();
 
-        ref.child("users").addValueEventListener(new ValueEventListener() {
+        mFirebaseDatabase.child("users").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -91,10 +99,11 @@ public class MainActivity extends AppCompatActivity {
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                DatabaseReference mRef = database.getReference("users");
-                if (!TextUtils.isEmpty(editText.getText())){
-                    mRef.setValue(editText.getText().toString());
+                String data=editText.getText().toString();
+                String value="1";
+                if (!TextUtils.isEmpty(data)){
+                    mFirebaseDatabase.child(userId).setValue(data);
+                    mFirebaseDatabase.child(userId).setValue(value);
                 }
 
             }
@@ -108,7 +117,56 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
             }
         });
+
+        btnCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String data=editText.getText().toString();
+                String value="1";
+                if (TextUtils.isEmpty(userId)){
+                    createUser(data,value);
+                }
+            }
+        });
     }
+
+
+    public void createUser(String name, String value) {
+        if (TextUtils.isEmpty(userId)){
+            userId = mFirebaseDatabase.push().getKey();
+        }
+        users user = new users(name, value);
+
+        mFirebaseDatabase.child(userId).setValue(user);
+
+        addUserChangeListener();
+    }
+
+    private void addUserChangeListener() {
+        // User data change listener
+        mFirebaseDatabase.child(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                users user = dataSnapshot.getValue(users.class);
+
+                // Check for null
+                if (user == null) {
+                   // Log.e(TAG, "User data is null!");
+                    return;
+                }
+
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.e( "Failed to read user", String.valueOf(error.toException()));
+            }
+        });
+    }
+
 
 
 
