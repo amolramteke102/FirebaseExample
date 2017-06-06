@@ -91,9 +91,10 @@ public class MainActivity extends AppCompatActivity {
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 DatabaseReference mRef = database.getReference("users");
                 if (!TextUtils.isEmpty(editText.getText())){
-                    mRef.setValue(editText.getText());
+                    mRef.setValue(editText.getText().toString());
                 }
 
             }
